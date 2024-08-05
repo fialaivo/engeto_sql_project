@@ -8,23 +8,29 @@ CREATE OR REPLACE VIEW v_avg_annual_salary AS
 	GROUP BY payroll_year 
 	ORDER BY payroll_year;
 
--- vytvoření tabulky s průměrnými cenami potravin v jednotlivých letech, připojen sloupec s průměrnými platy v jednotlivých letech
-CREATE OR REPLACE TABLE t_Ivo_Fiala_project_SQL_primary_final AS
+-- HDP v ČR v letech 2006 až 2018
+CREATE OR REPLACE VIEW v_HDP_cz AS 
+	SELECT country, YEAR, GDP
+	FROM economies e 
+	WHERE country = "Czech Republic" AND year >= 2006 AND year <= 2018 
+	ORDER BY YEAR;
+
+CREATE OR REPLACE TABLE t_ivo_fiala_project_sql_primary_final AS
 WITH avg_prices AS (
 -- průměrné ceny potravin v jednotlivých letech
 	SELECT 
-		category_code, 
-		YEAR(date_from) AS cpyear, 
-		round(avg(value),2) AS cpround  
+	category_code, 
+	YEAR (date_from) cpyear, 
+	round(avg(value),2) cpround  
 	FROM czechia_price cp 
 	WHERE region_code IS NULL 
-	GROUP BY category_code, YEAR(date_from)
+	GROUP BY category_code, YEAR (date_from)
 	ORDER BY category_code, date_from  
 )
 SELECT 
 	avgp.*,	
-	vaas.avg_annual_salary 
-FROM avg_prices AS avgp
-JOIN v_avg_annual_salary AS vaas
-ON avgp.cpyear = vaas.payroll_year 
-ORDER BY avgp.category_code, avgp.cpyear;
+	vaas.avg_annual_salary,
+	hdp.GDP
+FROM avg_prices AS avgp, v_avg_annual_salary AS vaas, v_HDP_cz AS hdp 
+WHERE avgp.cpyear = vaas.payroll_year AND avgp.cpyear = hdp.YEAR
+ORDER BY avgp.category_code, avgp.cpyear

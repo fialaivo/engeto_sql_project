@@ -8,7 +8,7 @@ WITH avg_food_salary AS (
         avg_annual_salary, 
         GDP
     FROM 
-        t_ivo_fiala_project_sql_secondary_final tifpssf
+        t_ivo_fiala_project_sql_primary_final tifpssf
     GROUP BY 
         cpyear
 )
