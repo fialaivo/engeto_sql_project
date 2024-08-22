@@ -1,26 +1,28 @@
 -- Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
 
--- vytvoření tabulky Q3 - výpočet procentuálního nárůstu mezi jednotlivými lety (percent_increase) a indikace změny potraviny (change_category_code)
-CREATE OR REPLACE TABLE Q3 
+-- vytvoření tabulky Q3 - výpočet procentuálního nárůstu mezi jednotlivými lety (percent_increase) 
+CREATE OR REPLACE TABLE Q3 AS
+WITH Deduplicated_Q3 AS (
+    SELECT DISTINCT 
+        category_code,
+        cpyear,
+        cpround,
+        avg_annual_salary_cr,
+        GDP
+    FROM t_ivo_fiala_project_sql_primary_final pf 
+)
 SELECT *,
-	round((cpround - LAG(cpround) OVER (ORDER BY category_code, cpyear)) / ( LAG(cpround) OVER (ORDER BY category_code, cpyear)/ 100),2) AS percent_increase,
-	CASE 
-	    WHEN category_code = LAG(category_code) OVER (ORDER BY category_code , cpyear) THEN 0
-	    ELSE 1
-	END AS change_category_code
-FROM t_ivo_fiala_project_sql_primary_final tifpspf
-
--- uprava dat v tabulce q3, změna hodnoty sloupce percent_increase
--- měním hodnotu na NULL u těch řádků, kde dochází u vstupních dat ke změně potraviny
-
-UPDATE q3 
-SET percent_increase = NULL 
-WHERE change_category_code = 1;
+    CASE 
+        WHEN category_code = LAG(category_code) OVER (PARTITION BY category_code ORDER BY cpyear) THEN
+            ROUND((cpround - LAG(cpround) OVER (PARTITION BY category_code ORDER BY cpyear)) / (LAG(cpround) OVER (PARTITION BY category_code ORDER BY cpyear) / 100), 2)
+        ELSE 
+            NULL 
+    END AS percent_increase
+FROM Deduplicated_Q3;
 
 -- výpočet průměrného ročního nárustu, seřazení sestupně
 -- odstranění položek u kterých došlo ke zlevnění
 -- výpis potraviny podle category_code
- 
 
 WITH avg_increase_category AS(
 	SELECT 
