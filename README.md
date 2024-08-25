@@ -1,4 +1,4 @@
-#SQL PROJEKT ENGETO
+# SQL PROJEKT ENGETO
 
 1. skript create_primary_final_table.sql - skript vytváří tabulku kódů potravin, ve které je uvedeno pro dané časové období (roky 2006 - 2018) průměrná cena potraviny, průměrný plat pro příslušný rok a také HDP
    v ČR, z této tabulky vychází výsledky skriptů Q1.sql až Q5.sql
