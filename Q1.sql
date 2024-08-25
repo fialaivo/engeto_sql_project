@@ -4,18 +4,18 @@
 
 CREATE OR REPLACE TABLE q1
 WITH Deduplicated_Q1 AS (
-    SELECT DISTINCT
-        payroll_year,
-        industry_branch_code,
-        avg_annual_salary
-    FROM t_ivo_fiala_project_sql_primary_final tifpspf 
+	SELECT DISTINCT
+		payroll_year,
+		industry_branch_code,
+		avg_annual_salary
+	FROM t_ivo_fiala_project_sql_primary_final AS pf 
 )
 SELECT 
-    payroll_year,
-    industry_branch_code,
-    avg_annual_salary,
-    avg_annual_salary - LAG(avg_annual_salary) 
-        OVER (PARTITION BY industry_branch_code ORDER BY payroll_year) AS difference_from_previous
+	payroll_year,
+	industry_branch_code,
+	avg_annual_salary,
+	avg_annual_salary - LAG(avg_annual_salary) 
+		OVER (PARTITION BY industry_branch_code ORDER BY payroll_year) AS difference_from_previous
 FROM Deduplicated_Q1
 ORDER BY industry_branch_code, payroll_year;
 
